@@ -16,7 +16,9 @@ import {
   Evidence,
   Notification,
   ChatMessage,
-  ActivityLog
+  ActivityLog,
+  StudentCertificate,
+  StudentActivity
 } from './types';
 
 import { db, isFirebaseEnabled } from './lib/firebase';
@@ -1226,6 +1228,68 @@ export const getInitialActivityLogs = (): ActivityLog[] => [
   }
 ];
 
+// Initial Certificates
+export const getInitialCertificates = (): StudentCertificate[] => [
+  {
+    CertificateID: 'CERT_1',
+    StudentUserID: 'U_STUDENT_1',
+    Title: 'Certificate of Participation',
+    Issuer: 'Faculty of Nursing, Prince of Songkla University',
+    DateString: 'May 27-29, 2026',
+    ImageURL: 'https://images.unsplash.com/photo-1589330694653-ded6df53f6ee?auto=format&fit=crop&q=80&w=800',
+    CreatedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+    UpdatedAt: new Date(Date.now() - 3600000 * 48).toISOString()
+  },
+  {
+    CertificateID: 'CERT_2',
+    StudentUserID: 'U_STUDENT_1',
+    Title: 'Certificate of Oral Presentation',
+    Issuer: 'Faculty of Nursing, Prince of Songkla University',
+    DateString: 'May 28, 2026',
+    ImageURL: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=800',
+    CreatedAt: new Date(Date.now() - 3600000 * 47).toISOString(),
+    UpdatedAt: new Date(Date.now() - 3600000 * 47).toISOString()
+  }
+];
+
+// Initial Activities
+export const getInitialActivities = (): StudentActivity[] => [
+  {
+    ActivityID: 'ACT_1',
+    StudentUserID: 'U_STUDENT_1',
+    MonthYear: 'October 2025',
+    Title: 'Phenomenon of Interest Development and Literature Review',
+    BulletPoints: [
+      'Initiated consultation with the academic advisor regarding doctoral research interests.',
+      'Developed the phenomenon of interest focusing on family caregiving experiences in older adults with COPD.',
+      'Conducted an initial literature review and received guidance on qualitative evidence synthesis.',
+      'Discussed theoretical foundations, patterns of knowing, and conceptual development for future research.'
+    ],
+    Images: [
+      'https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=600'
+    ],
+    CreatedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+    UpdatedAt: new Date(Date.now() - 3600000 * 48).toISOString()
+  },
+  {
+    ActivityID: 'ACT_2',
+    StudentUserID: 'U_STUDENT_1',
+    MonthYear: 'November 2025',
+    Title: 'Research Methodology Consultation',
+    BulletPoints: [
+      'Consulted with the academic advisor regarding qualitative research methods and critical appraisal tools.',
+      'Refined review objectives and methodological approaches for evidence synthesis.'
+    ],
+    Images: [
+      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600'
+    ],
+    CreatedAt: new Date(Date.now() - 3600000 * 47).toISOString(),
+    UpdatedAt: new Date(Date.now() - 3600000 * 47).toISOString()
+  }
+];
+
+
 // LocalDatabase Store Engine wrapper
 export class LocalDatabaseStore {
   constructor() {
@@ -1260,11 +1324,22 @@ export class LocalDatabaseStore {
       this.set('notifications', getInitialNotifications());
       this.set('chatMessages', getInitialChatMessages());
       this.set('activityLogs', getInitialActivityLogs());
+      this.set('certificates', getInitialCertificates());
+      this.set('activities', getInitialActivities());
       localStorage.setItem('doctoral_portfolio_initialized', 'true');
     } else {
       // Self-healing: ensure SuperAdvisor and Arpasree Admin seeded users are injected into existing localStorage
       const existingUsers = this.get<any[]>('users', []);
       let updated = false;
+
+      // Ensure certificates collection exists
+      if (!localStorage.getItem('doctoral_portfolio_certificates')) {
+        this.set('certificates', getInitialCertificates());
+      }
+      // Ensure activities collection exists
+      if (!localStorage.getItem('doctoral_portfolio_activities')) {
+        this.set('activities', getInitialActivities());
+      }
 
       const hasSuperAdvisor = existingUsers.some(u => u.Role === 'SuperAdvisor');
       const initialUsers = getInitialUsers();
@@ -1341,7 +1416,9 @@ export class LocalDatabaseStore {
           { key: 'evidence', col: 'evidence', idField: 'EvidenceID' },
           { key: 'chatMessages', col: 'chatMessages', idField: 'MessageID' },
           { key: 'notifications', col: 'notifications', idField: 'NotificationID' },
-          { key: 'activityLogs', col: 'activityLogs', idField: 'LogID' }
+          { key: 'activityLogs', col: 'activityLogs', idField: 'LogID' },
+          { key: 'certificates', col: 'certificates', idField: 'CertificateID' },
+          { key: 'activities', col: 'activities', idField: 'ActivityID' }
         ];
 
         for (const item of collectionsToSeed) {
@@ -1392,7 +1469,9 @@ export class LocalDatabaseStore {
       { key: 'evidence', col: 'evidence' },
       { key: 'chatMessages', col: 'chatMessages' },
       { key: 'notifications', col: 'notifications' },
-      { key: 'activityLogs', col: 'activityLogs' }
+      { key: 'activityLogs', col: 'activityLogs' },
+      { key: 'certificates', col: 'certificates' },
+      { key: 'activities', col: 'activities' }
     ];
 
     const unsubscribers: (() => void)[] = [];
@@ -1468,6 +1547,14 @@ export class LocalDatabaseStore {
 
   getLogs(): ActivityLog[] {
     return LocalDatabaseStore.get<ActivityLog[]>('activityLogs', []);
+  }
+
+  getCertificates(): StudentCertificate[] {
+    return LocalDatabaseStore.get<StudentCertificate[]>('certificates', []);
+  }
+
+  getActivities(): StudentActivity[] {
+    return LocalDatabaseStore.get<StudentActivity[]>('activities', []);
   }
 
   // Mutators
@@ -1647,6 +1734,78 @@ export class LocalDatabaseStore {
     const hours = this.getResearchHours().filter(h => h.HourID !== hourId);
     LocalDatabaseStore.set('researchHours', hours);
     LocalDatabaseStore.deleteDocFromFirebase('researchHours', hourId);
+  }
+
+  saveCertificate(payload: any): void {
+    const certs = this.getCertificates();
+    if (payload.CertificateID) {
+      const idx = certs.findIndex(c => c.CertificateID === payload.CertificateID);
+      if (idx !== -1) {
+        certs[idx] = {
+          ...certs[idx],
+          ...payload,
+          UpdatedAt: new Date().toISOString()
+        };
+        LocalDatabaseStore.set('certificates', certs);
+        LocalDatabaseStore.syncDocToFirebase('certificates', payload.CertificateID, certs[idx]);
+      }
+    } else {
+      const newCert: StudentCertificate = {
+        CertificateID: generateId('CERT'),
+        StudentUserID: payload.StudentUserID,
+        Title: payload.Title || '',
+        Issuer: payload.Issuer || '',
+        DateString: payload.DateString || '',
+        ImageURL: payload.ImageURL || '',
+        CreatedAt: new Date().toISOString(),
+        UpdatedAt: new Date().toISOString()
+      };
+      certs.push(newCert);
+      LocalDatabaseStore.set('certificates', certs);
+      LocalDatabaseStore.syncDocToFirebase('certificates', newCert.CertificateID, newCert);
+    }
+  }
+
+  deleteCertificate(certId: string): void {
+    const certs = this.getCertificates().filter(c => c.CertificateID !== certId);
+    LocalDatabaseStore.set('certificates', certs);
+    LocalDatabaseStore.deleteDocFromFirebase('certificates', certId);
+  }
+
+  saveActivity(payload: any): void {
+    const acts = this.getActivities();
+    if (payload.ActivityID) {
+      const idx = acts.findIndex(a => a.ActivityID === payload.ActivityID);
+      if (idx !== -1) {
+        acts[idx] = {
+          ...acts[idx],
+          ...payload,
+          UpdatedAt: new Date().toISOString()
+        };
+        LocalDatabaseStore.set('activities', acts);
+        LocalDatabaseStore.syncDocToFirebase('activities', payload.ActivityID, acts[idx]);
+      }
+    } else {
+      const newAct: StudentActivity = {
+        ActivityID: generateId('ACT'),
+        StudentUserID: payload.StudentUserID,
+        MonthYear: payload.MonthYear || '',
+        Title: payload.Title || '',
+        BulletPoints: payload.BulletPoints || [],
+        Images: payload.Images || [],
+        CreatedAt: new Date().toISOString(),
+        UpdatedAt: new Date().toISOString()
+      };
+      acts.push(newAct);
+      LocalDatabaseStore.set('activities', acts);
+      LocalDatabaseStore.syncDocToFirebase('activities', newAct.ActivityID, newAct);
+    }
+  }
+
+  deleteActivity(actId: string): void {
+    const acts = this.getActivities().filter(a => a.ActivityID !== actId);
+    LocalDatabaseStore.set('activities', acts);
+    LocalDatabaseStore.deleteDocFromFirebase('activities', actId);
   }
 
   sendChatMessage(senderId: string, studentId: string, receiverId: string, text: string): void {

@@ -212,3 +212,26 @@ export interface ActivityLog {
   Detail: string;
   CreatedAt: string;
 }
+
+export interface StudentCertificate {
+  CertificateID: string;
+  StudentUserID: string;
+  Title: string;
+  Issuer: string;
+  DateString: string;
+  ImageURL: string; // Base64 or Web URL
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
+export interface StudentActivity {
+  ActivityID: string;
+  StudentUserID: string;
+  MonthYear: string; // e.g. "October 2025"
+  Title: string;
+  BulletPoints: string[]; // List of activity descriptions
+  Images: string[]; // List of Base64 or Web URLs
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+

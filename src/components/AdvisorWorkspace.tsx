@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { exportStudentToExcel } from '../lib/excelExporter';
 import {
   Users,
   Search,
@@ -28,7 +29,9 @@ import {
   Endorsement,
   Evidence,
   ChatMessage,
-  Notification
+  Notification,
+  StudentCertificate,
+  StudentActivity
 } from '../types';
 
 import StudentDashboard from './StudentDashboard';
@@ -49,12 +52,18 @@ interface AdvisorWorkspaceProps {
   evidence: Evidence[];
   chats: ChatMessage[];
   notifications: Notification[];
+  certificates: StudentCertificate[];
+  activities: StudentActivity[];
   onSaveRecord: (section: number, payload: any) => void;
   onDeleteRecord: (section: number, payload: any) => void;
   onSendChat: (receiverId: string, text: string) => void;
   onSendNotify: (receiverId: string, title: string, message: string) => void;
   onSaveComment: (studentId: string, text: string, rec: string) => void;
   onSignEndorsement: (studentId: string, role: string, signature: string) => void;
+  onSaveCertificate: (cert: any) => void;
+  onDeleteCertificate: (id: string) => void;
+  onSaveActivity: (act: any) => void;
+  onDeleteActivity: (id: string) => void;
 }
 
 export default function AdvisorWorkspace({
@@ -70,12 +79,18 @@ export default function AdvisorWorkspace({
   evidence,
   chats,
   notifications,
+  certificates,
+  activities,
   onSaveRecord,
   onDeleteRecord,
   onSendChat,
   onSendNotify,
   onSaveComment,
-  onSignEndorsement
+  onSignEndorsement,
+  onSaveCertificate,
+  onDeleteCertificate,
+  onSaveActivity,
+  onDeleteActivity
 }: AdvisorWorkspaceProps) {
 
   const [selectedStudentId, setSelectedStudentId] = React.useState<string>(students[0]?.UserID || '');
@@ -309,6 +324,13 @@ export default function AdvisorWorkspace({
                 advisor={advisorUser}
                 coadvisor={null} // placeholder co-advisor lookup or just null
                 onSaveProfile={(payload) => onSaveRecord(1, { type: 'profile', payload })}
+                currentUser={advisorUser}
+                certificates={certificates}
+                activities={activities}
+                onSaveCertificate={onSaveCertificate}
+                onDeleteCertificate={onDeleteCertificate}
+                onSaveActivity={onSaveActivity}
+                onDeleteActivity={onDeleteActivity}
               />
             )}
 
@@ -516,19 +538,52 @@ export default function AdvisorWorkspace({
             )}
 
             {activeTab === 'report' && (
-              <PrintReport
-                student={activeStudent}
-                advisor={advisorUser}
-                coadvisor={null}
-                records={studentRecords}
-                profile={studentProfile}
-                dissertation={studentDissertation}
-                researchHours={studentHours}
-                competencies={studentCompetencies}
-                comments={comments}
-                endorsements={endorsements}
-                evidence={studentEvidence}
-              />
+              <div className="space-y-6">
+                <div className="flex justify-between items-center bg-[#FFFDF9] border border-amber-200/30 p-4 rounded-xl">
+                  <div>
+                    <h3 className="font-bold text-red-950">Export Official Student Portfolio</h3>
+                    <p className="text-xs text-gray-500">Print standard A4 documents or export the student's complete portfolio dataset as an Excel spreadsheet.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => exportStudentToExcel({
+                        student: activeStudent,
+                        advisor: advisorUser,
+                        coadvisor: null,
+                        records: studentRecords,
+                        profile: studentProfile,
+                        dissertation: studentDissertation,
+                        researchHours: studentHours,
+                        competencies: studentCompetencies,
+                        certificates: certificates.filter(c => c.StudentUserID === activeStudent.UserID),
+                        activities: activities.filter(a => a.StudentUserID === activeStudent.UserID)
+                      })}
+                      className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5 transition-all"
+                    >
+                      Export Excel (.xlsx)
+                    </button>
+                    <button
+                      onClick={() => window.print()}
+                      className="px-4 py-2 bg-red-800 hover:bg-red-900 text-white rounded-lg text-xs font-bold shadow-md cursor-pointer transition-all"
+                    >
+                      Print / Save PDF
+                    </button>
+                  </div>
+                </div>
+                <PrintReport
+                  student={activeStudent}
+                  advisor={advisorUser}
+                  coadvisor={null}
+                  records={studentRecords}
+                  profile={studentProfile}
+                  dissertation={studentDissertation}
+                  researchHours={studentHours}
+                  competencies={studentCompetencies}
+                  comments={comments}
+                  endorsements={endorsements}
+                  evidence={studentEvidence}
+                />
+              </div>
             )}
 
           </div>

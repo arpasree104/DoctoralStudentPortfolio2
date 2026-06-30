@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 
 import { LocalDatabaseStore } from './data';
+import { exportStudentToExcel } from './lib/excelExporter';
 import { isFirebaseEnabled } from './lib/firebase';
 import {
   User as UserType,
@@ -39,7 +40,9 @@ import {
   Evidence,
   ChatMessage,
   Notification,
-  ActivityLog
+  ActivityLog,
+  StudentCertificate,
+  StudentActivity
 } from './types';
 
 // Page components
@@ -73,6 +76,8 @@ export default function App() {
   const [chats, setChats] = React.useState<ChatMessage[]>([]);
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const [logs, setLogs] = React.useState<ActivityLog[]>([]);
+  const [certificates, setCertificates] = React.useState<StudentCertificate[]>([]);
+  const [activities, setActivities] = React.useState<StudentActivity[]>([]);
 
   // Selected portfolio section (for student or active workspace)
   const [selectedSection, setSelectedSection] = React.useState<number>(1);
@@ -136,6 +141,8 @@ export default function App() {
     setChats(dbStore.getChats());
     setNotifications(dbStore.getNotifications());
     setLogs(dbStore.getLogs());
+    setCertificates(dbStore.getCertificates());
+    setActivities(dbStore.getActivities());
   };
 
   // Initialize initial state on mount and subscribe to Firebase
@@ -270,6 +277,38 @@ export default function App() {
     setCurrentUser(null);
     setIsLoggedIn(false);
     setActivePage('dashboard');
+  };
+
+  const handleSaveCertificate = (payload: any) => {
+    dbStore.saveCertificate(payload);
+    refreshFromStore();
+    if (currentUser) {
+      dbStore.addLog('SAVE_CERTIFICATE', currentUser.UserID, `Saved certificate: ${payload.Title}`);
+    }
+  };
+
+  const handleDeleteCertificate = (id: string) => {
+    dbStore.deleteCertificate(id);
+    refreshFromStore();
+    if (currentUser) {
+      dbStore.addLog('DELETE_CERTIFICATE', currentUser.UserID, `Deleted certificate ID: ${id}`);
+    }
+  };
+
+  const handleSaveActivity = (payload: any) => {
+    dbStore.saveActivity(payload);
+    refreshFromStore();
+    if (currentUser) {
+      dbStore.addLog('SAVE_ACTIVITY', currentUser.UserID, `Saved monthly activity: ${payload.Title}`);
+    }
+  };
+
+  const handleDeleteActivity = (id: string) => {
+    dbStore.deleteActivity(id);
+    refreshFromStore();
+    if (currentUser) {
+      dbStore.addLog('DELETE_ACTIVITY', currentUser.UserID, `Deleted activity ID: ${id}`);
+    }
   };
 
   // Mutator triggers
@@ -939,6 +978,13 @@ export default function App() {
             advisor={currentStudentAdvisor}
             coadvisor={currentStudentCoadvisor}
             onSaveProfile={(payload) => handleSaveRecord(1, { type: 'profile', payload })}
+            currentUser={currentUser}
+            certificates={certificates}
+            activities={activities}
+            onSaveCertificate={handleSaveCertificate}
+            onDeleteCertificate={handleDeleteCertificate}
+            onSaveActivity={handleSaveActivity}
+            onDeleteActivity={handleDeleteActivity}
           />
         )}
 
@@ -965,12 +1011,31 @@ export default function App() {
                 <h3 className="font-bold text-red-950">Export Official Portfolio Template</h3>
                 <p className="text-xs text-gray-500">Print or save standard A4 documents with complete tables (Section 1-16) for PhD faculty review committees.</p>
               </div>
-              <button
-                onClick={() => window.print()}
-                className="px-4 py-2 bg-red-800 hover:bg-red-900 text-white rounded-lg text-xs font-bold shadow-md cursor-pointer"
-              >
-                Print / Save PDF
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => exportStudentToExcel({
+                    student: currentUser,
+                    advisor: currentStudentAdvisor,
+                    coadvisor: currentStudentCoadvisor,
+                    records: currentStudentRecords,
+                    profile: currentStudentProfile,
+                    dissertation: currentStudentDissertation,
+                    researchHours: currentStudentHours,
+                    competencies: currentStudentCompetencies,
+                    certificates: certificates.filter(c => c.StudentUserID === currentUser.UserID),
+                    activities: activities.filter(a => a.StudentUserID === currentUser.UserID)
+                  })}
+                  className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5 transition-all"
+                >
+                  Export Excel (.xlsx)
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="px-4 py-2 bg-red-800 hover:bg-red-900 text-white rounded-lg text-xs font-bold shadow-md cursor-pointer transition-all"
+                >
+                  Print / Save PDF
+                </button>
+              </div>
             </div>
             <PrintReport
               student={currentUser}
@@ -1032,12 +1097,18 @@ export default function App() {
             evidence={evidence}
             chats={chats}
             notifications={notifications}
+            certificates={certificates}
+            activities={activities}
             onSaveRecord={handleSaveRecord}
             onDeleteRecord={handleDeleteRecord}
             onSendChat={handleSendChat}
             onSendNotify={handleSendNotify}
             onSaveComment={handleSaveComment}
             onSignEndorsement={handleSignEndorsement}
+            onSaveCertificate={handleSaveCertificate}
+            onDeleteCertificate={handleDeleteCertificate}
+            onSaveActivity={handleSaveActivity}
+            onDeleteActivity={handleDeleteActivity}
           />
         )}
 
