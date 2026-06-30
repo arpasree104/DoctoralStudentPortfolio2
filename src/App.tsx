@@ -108,8 +108,7 @@ export default function App() {
   const [showSandboxShortcut, setShowSandboxShortcut] = React.useState(() => {
     return (
       window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1' ||
-      window.location.search.includes('sandbox=true')
+      window.location.hostname === '127.0.0.1'
     );
   });
 
