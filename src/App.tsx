@@ -882,16 +882,18 @@ export default function App() {
             )}
 
             {/* Quick Toggle Sandbox Widget */}
-            <div className="hidden lg:flex items-center gap-1 bg-[#FFF8E7] px-2.5 py-1 rounded-lg border border-[#B91C1C]/15 text-[10px] font-bold text-[#1A1A1A]">
-              <span className="text-[#B91C1C]">Evaluate:</span>
-              <button onClick={() => handleQuickLogin('student@example.com')} className="hover:underline text-[#B91C1C] ml-1">Student</button>
-              <span className="text-gray-300">|</span>
-              <button onClick={() => handleQuickLogin('advisor@example.com')} className="hover:underline text-[#B91C1C]">Advisor</button>
-              <span className="text-gray-300">|</span>
-              <button onClick={() => handleQuickLogin('superadvisor@example.com')} className="hover:underline text-purple-700">Super</button>
-              <span className="text-gray-300">|</span>
-              <button onClick={() => handleQuickLogin('admin@example.com')} className="hover:underline text-[#B91C1C]">Admin</button>
-            </div>
+            {showSandboxShortcut && (
+              <div className="hidden lg:flex items-center gap-1 bg-[#FFF8E7] px-2.5 py-1 rounded-lg border border-[#B91C1C]/15 text-[10px] font-bold text-[#1A1A1A]">
+                <span className="text-[#B91C1C]">Evaluate:</span>
+                <button onClick={() => handleQuickLogin('student@example.com')} className="hover:underline text-[#B91C1C] ml-1">Student</button>
+                <span className="text-gray-300">|</span>
+                <button onClick={() => handleQuickLogin('advisor@example.com')} className="hover:underline text-[#B91C1C]">Advisor</button>
+                <span className="text-gray-300">|</span>
+                <button onClick={() => handleQuickLogin('superadvisor@example.com')} className="hover:underline text-purple-700">Super</button>
+                <span className="text-gray-300">|</span>
+                <button onClick={() => handleQuickLogin('admin@example.com')} className="hover:underline text-[#B91C1C]">Admin</button>
+              </div>
+            )}
 
             {/* User Profile display card */}
             <div className="flex items-center gap-2 border-l border-gray-200 pl-3">
