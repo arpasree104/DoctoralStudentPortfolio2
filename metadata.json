@@ -1,0 +1,6 @@
+{
+  "name": "Doctoral Student Portfolio Management System",
+  "description": "A comprehensive, high-performance portfolio tracking and communication platform for Thammasat University PhD nursing students, advisors, and admins.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

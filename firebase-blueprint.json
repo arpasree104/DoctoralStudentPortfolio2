@@ -1,0 +1,318 @@
+{
+  "entities": {
+    "Setting": {
+      "title": "Setting",
+      "description": "System configuration setting",
+      "type": "object",
+      "properties": {
+        "SettingKey": { "type": "string" },
+        "SettingValue": { "type": "string" },
+        "Description": { "type": "string" },
+        "Example": { "type": "string" },
+        "UpdatedAt": { "type": "string", "format": "date-time" },
+        "UpdatedBy": { "type": "string" }
+      },
+      "required": ["SettingKey", "SettingValue"]
+    },
+    "User": {
+      "title": "User",
+      "description": "University user (student, advisor, admin)",
+      "type": "object",
+      "properties": {
+        "UserID": { "type": "string" },
+        "Email": { "type": "string" },
+        "Role": { "type": "string" },
+        "Prefix": { "type": "string" },
+        "FirstName": { "type": "string" },
+        "LastName": { "type": "string" },
+        "FullName": { "type": "string" },
+        "Position": { "type": "string" },
+        "Affiliation": { "type": "string" },
+        "Phone": { "type": "string" },
+        "LineID": { "type": "string" },
+        "ResearchInterests": { "type": "string" },
+        "ORCID": { "type": "string" },
+        "PhotoURL": { "type": "string" },
+        "StudentID": { "type": "string" },
+        "Program": { "type": "string" },
+        "Faculty": { "type": "string" },
+        "University": { "type": "string" },
+        "AdmissionYear": { "type": "number" },
+        "ExpectedGraduationYear": { "type": "number" },
+        "MajorAdvisorID": { "type": "string" },
+        "CoAdvisorIDs": { "type": "string" },
+        "Status": { "type": "string" },
+        "CreatedAt": { "type": "string" },
+        "UpdatedAt": { "type": "string" }
+      },
+      "required": ["UserID", "Email", "Role", "FullName"]
+    },
+    "PortfolioRecord": {
+      "title": "PortfolioRecord",
+      "description": "A single row/entry in the doctoral portfolio (Sections 1-16)",
+      "type": "object",
+      "properties": {
+        "RecordID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "SectionNo": { "type": "number" },
+        "SectionTitle": { "type": "string" },
+        "SubsectionNo": { "type": "string" },
+        "SubsectionTitle": { "type": "string" },
+        "RecordType": { "type": "string" },
+        "Field1": { "type": "string" },
+        "Field2": { "type": "string" },
+        "Field3": { "type": "string" },
+        "Field4": { "type": "string" },
+        "Field5": { "type": "string" },
+        "Field6": { "type": "string" },
+        "Field7": { "type": "string" },
+        "LongText": { "type": "string" },
+        "Status": { "type": "string" },
+        "CreatedBy": { "type": "string" },
+        "CreatedAt": { "type": "string" },
+        "UpdatedBy": { "type": "string" },
+        "UpdatedAt": { "type": "string" }
+      },
+      "required": ["RecordID", "StudentUserID", "SectionNo", "Status"]
+    },
+    "StudentProfile": {
+      "title": "StudentProfile",
+      "description": "Reflective essays and student goals profile",
+      "type": "object",
+      "properties": {
+        "ProfileID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "FullName": { "type": "string" },
+        "ContactInformation": { "type": "string" },
+        "CurrentPositionAffiliation": { "type": "string" },
+        "ResearchInterests": { "type": "string" },
+        "ORCID": { "type": "string" },
+        "GoalsForDoctoralStudy": { "type": "string" },
+        "DevelopmentPlan": { "type": "string" },
+        "EnglishReflection": { "type": "string" },
+        "ResearchExperienceReflection": { "type": "string" },
+        "NetworkingReflection": { "type": "string" },
+        "CommunicationReflection": { "type": "string" },
+        "AcademicGrowthReflection": { "type": "string" },
+        "ResearchIdentityReflection": { "type": "string" },
+        "ChallengesReflection": { "type": "string" },
+        "TransformationReflection": { "type": "string" },
+        "ShortTermCareerGoals": { "type": "string" },
+        "LongTermCareerAspirations": { "type": "string" },
+        "PreparationNeeded": { "type": "string" },
+        "UpdatedAt": { "type": "string" },
+        "UpdatedBy": { "type": "string" }
+      },
+      "required": ["ProfileID", "StudentUserID"]
+    },
+    "Dissertation": {
+      "title": "Dissertation",
+      "description": "Information about a student's dissertation topic",
+      "type": "object",
+      "properties": {
+        "DissertationID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "Title": { "type": "string" },
+        "TopicDevelopment": { "type": "string" },
+        "BackgroundSignificance": { "type": "string" },
+        "ResearchProblem": { "type": "string" },
+        "Objectives": { "type": "string" },
+        "ResearchQuestionsHypotheses": { "type": "string" },
+        "ConceptualFramework": { "type": "string" },
+        "MethodologyOverview": { "type": "string" },
+        "EthicsApplicationDate": { "type": "string" },
+        "EthicsApprovalDate": { "type": "string" },
+        "ApprovalNumber": { "type": "string" },
+        "Amendments": { "type": "string" },
+        "DataManagementNotes": { "type": "string" },
+        "ChallengesSolutions": { "type": "string" },
+        "UpdatedAt": { "type": "string" },
+        "UpdatedBy": { "type": "string" }
+      },
+      "required": ["DissertationID", "StudentUserID"]
+    },
+    "ResearchHour": {
+      "title": "ResearchHour",
+      "description": "Logged research activity hours towards the 180-hour requirement",
+      "type": "object",
+      "properties": {
+        "HourID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "Date": { "type": "string" },
+        "ResearchActivity": { "type": "string" },
+        "WorkDescription": { "type": "string" },
+        "Hours": { "type": "number" },
+        "SupervisorAdvisor": { "type": "string" },
+        "CreatedBy": { "type": "string" },
+        "CreatedAt": { "type": "string" },
+        "UpdatedAt": { "type": "string" }
+      },
+      "required": ["HourID", "StudentUserID", "Hours", "Date", "ResearchActivity"]
+    },
+    "CompetencyAssessment": {
+      "title": "CompetencyAssessment",
+      "description": "Standard doctoral competency level evaluation",
+      "type": "object",
+      "properties": {
+        "AssessmentID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "Competency": { "type": "string" },
+        "Level": { "type": "string" },
+        "EvidenceRemarks": { "type": "string" },
+        "ReviewYear": { "type": "number" },
+        "CreatedBy": { "type": "string" },
+        "CreatedAt": { "type": "string" },
+        "UpdatedAt": { "type": "string" }
+      },
+      "required": ["AssessmentID", "StudentUserID", "Competency", "Level"]
+    },
+    "AdvisorComment": {
+      "title": "AdvisorComment",
+      "description": "Annual evaluation feedback and suggestions by advisors",
+      "type": "object",
+      "properties": {
+        "CommentID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "AdvisorUserID": { "type": "string" },
+        "ReviewYear": { "type": "number" },
+        "CommentText": { "type": "string" },
+        "Recommendation": { "type": "string" },
+        "Status": { "type": "string" },
+        "CreatedAt": { "type": "string" },
+        "UpdatedAt": { "type": "string" }
+      },
+      "required": ["CommentID", "StudentUserID", "AdvisorUserID", "CommentText"]
+    },
+    "Endorsement": {
+      "title": "Endorsement",
+      "description": "Sign-off endorsements indicating thesis approval",
+      "type": "object",
+      "properties": {
+        "EndorsementID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "Role": { "type": "string" },
+        "AdvisorUserID": { "type": "string" },
+        "AdvisorName": { "type": "string" },
+        "SignatureText": { "type": "string" },
+        "SignatureDate": { "type": "string" },
+        "Status": { "type": "string" },
+        "CreatedAt": { "type": "string" },
+        "UpdatedAt": { "type": "string" }
+      },
+      "required": ["EndorsementID", "StudentUserID", "Role", "SignatureText"]
+    },
+    "Evidence": {
+      "title": "Evidence",
+      "description": "Portfolio evidence attachment references",
+      "type": "object",
+      "properties": {
+        "EvidenceID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "FileName": { "type": "string" },
+        "FileURL": { "type": "string" },
+        "UploadedBy": { "type": "string" },
+        "UploadedAt": { "type": "string" },
+        "Description": { "type": "string" }
+      },
+      "required": ["EvidenceID", "StudentUserID", "FileName", "FileURL"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Instant support message exchanged in doctoral committees",
+      "type": "object",
+      "properties": {
+        "MessageID": { "type": "string" },
+        "ThreadID": { "type": "string" },
+        "SenderUserID": { "type": "string" },
+        "ReceiverUserID": { "type": "string" },
+        "StudentUserID": { "type": "string" },
+        "MessageText": { "type": "string" },
+        "IsRead": { "type": "boolean" },
+        "CreatedAt": { "type": "string" }
+      },
+      "required": ["MessageID", "SenderUserID", "ReceiverUserID", "MessageText"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Instruction and timeline announcements dispatched to users",
+      "type": "object",
+      "properties": {
+        "NotificationID": { "type": "string" },
+        "SenderUserID": { "type": "string" },
+        "ReceiverUserID": { "type": "string" },
+        "Title": { "type": "string" },
+        "Message": { "type": "string" },
+        "IsRead": { "type": "boolean" },
+        "CreatedAt": { "type": "string" }
+      },
+      "required": ["NotificationID", "ReceiverUserID", "Title", "Message"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Administrative audit trail logs",
+      "type": "object",
+      "properties": {
+        "LogID": { "type": "string" },
+        "UserID": { "type": "string" },
+        "Action": { "type": "string" },
+        "Detail": { "type": "string" },
+        "CreatedAt": { "type": "string" }
+      },
+      "required": ["LogID", "UserID", "Action"]
+    }
+  },
+  "firestore": {
+    "settings/{settingKey}": {
+      "schema": "Setting",
+      "description": "Application settings configurations"
+    },
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User details"
+    },
+    "records/{recordId}": {
+      "schema": "PortfolioRecord",
+      "description": "Portfolio entry records"
+    },
+    "profiles/{profileId}": {
+      "schema": "StudentProfile",
+      "description": "Student essays profiles"
+    },
+    "dissertations/{dissertationId}": {
+      "schema": "Dissertation",
+      "description": "Dissertation details"
+    },
+    "researchHours/{hourId}": {
+      "schema": "ResearchHour",
+      "description": "Logged hours"
+    },
+    "competencies/{assessmentId}": {
+      "schema": "CompetencyAssessment",
+      "description": "Core assessments"
+    },
+    "comments/{commentId}": {
+      "schema": "AdvisorComment",
+      "description": "Advisors comments"
+    },
+    "endorsements/{endorsementId}": {
+      "schema": "Endorsement",
+      "description": "Advisors signoffs"
+    },
+    "evidence/{evidenceId}": {
+      "schema": "Evidence",
+      "description": "Attached evidence files"
+    },
+    "chatMessages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Direct advisement chat logs"
+    },
+    "notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Announcements and direct notices"
+    },
+    "activityLogs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Audit logging events"
+    }
+  }
+}
