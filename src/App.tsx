@@ -103,6 +103,26 @@ export default function App() {
   
   const [regError, setRegError] = React.useState('');
 
+  // Hidden backdoor / settings to show sandbox shortcuts
+  const [logoClickCount, setLogoClickCount] = React.useState(0);
+  const [showSandboxShortcut, setShowSandboxShortcut] = React.useState(() => {
+    return (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.search.includes('sandbox=true')
+    );
+  });
+
+  const handleLogoClick = () => {
+    setLogoClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        setShowSandboxShortcut(true);
+      }
+      return next;
+    });
+  };
+
   // Helper function to sync React state with LocalDatabaseStore
   const refreshFromStore = () => {
     setUsers(dbStore.getUsers());
@@ -613,7 +633,11 @@ export default function App() {
             
             {/* Tu Nursing Logo styling */}
             <div className="text-center space-y-2.5">
-              <div className="w-16 h-16 bg-[#B91C1C] rounded-2xl mx-auto flex items-center justify-center text-white border-2 border-[#F9C94A] shadow-xs">
+              <div 
+                onClick={handleLogoClick}
+                title="Click 5 times to reveal test shortcuts"
+                className="w-16 h-16 bg-[#B91C1C] rounded-2xl mx-auto flex items-center justify-center text-white border-2 border-[#F9C94A] shadow-xs cursor-pointer select-none active:scale-95 transition-all"
+              >
                 <GraduationCap className="w-9 h-9" />
               </div>
               <div className="space-y-1">
@@ -674,42 +698,44 @@ export default function App() {
             </div>
 
             {/* Quick Sandbox Login buttons for Grading Ease */}
-            <div className="space-y-2.5 pt-4 border-t border-gray-100">
-              <div className="flex items-center gap-1 text-[11px] font-bold text-[#B91C1C]">
-                <Sliders className="w-3.5 h-3.5" />
-                <span>Sandbox Testing Login Shortcuts (1-Click)</span>
+            {showSandboxShortcut && (
+              <div className="space-y-2.5 pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-1 text-[11px] font-bold text-[#B91C1C]">
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Sandbox Testing Login Shortcuts (1-Click)</span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin('student@example.com')}
+                    className="p-2 bg-red-50 hover:bg-red-100 text-[#B91C1C] border border-[#B91C1C]/10 rounded-xl text-center text-[9px] font-extrabold cursor-pointer transition-all hover:scale-102"
+                  >
+                    🎓 Student
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin('advisor@example.com')}
+                    className="p-2 bg-[#FFF8E7] hover:bg-[#F9C94A]/25 text-[#1A1A1A] border border-[#F9C94A]/40 rounded-xl text-center text-[9px] font-extrabold cursor-pointer transition-all hover:scale-102"
+                  >
+                    🔬 Advisor
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin('superadvisor@example.com')}
+                    className="p-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-center text-[9px] font-extrabold cursor-pointer transition-all hover:scale-102"
+                  >
+                    🛡️ Super
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin('admin@example.com')}
+                    className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-950 border border-slate-200 rounded-xl text-center text-[9px] font-extrabold cursor-pointer transition-all hover:scale-102"
+                  >
+                    ⚙️ Admin
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-4 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('student@example.com')}
-                  className="p-2 bg-red-50 hover:bg-red-100 text-[#B91C1C] border border-[#B91C1C]/10 rounded-xl text-center text-[9px] font-extrabold cursor-pointer transition-all hover:scale-102"
-                >
-                  🎓 Student
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('advisor@example.com')}
-                  className="p-2 bg-[#FFF8E7] hover:bg-[#F9C94A]/25 text-[#1A1A1A] border border-[#F9C94A]/40 rounded-xl text-center text-[9px] font-extrabold cursor-pointer transition-all hover:scale-102"
-                >
-                  🔬 Advisor
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('superadvisor@example.com')}
-                  className="p-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-center text-[9px] font-extrabold cursor-pointer transition-all hover:scale-102"
-                >
-                  🛡️ Super
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('admin@example.com')}
-                  className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-950 border border-slate-200 rounded-xl text-center text-[9px] font-extrabold cursor-pointer transition-all hover:scale-102"
-                >
-                  ⚙️ Admin
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         )}
 

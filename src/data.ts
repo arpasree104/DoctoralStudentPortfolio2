@@ -152,6 +152,23 @@ export const getInitialSettings = (): Setting[] => [
 // Initial Users
 export const getInitialUsers = (): User[] => [
   {
+    UserID: 'U_USER_ADMIN',
+    Email: 'arpasree104@gmail.com',
+    Password: '1234',
+    Role: 'Admin',
+    Prefix: 'Dr.',
+    FirstName: 'Arpasree',
+    LastName: 'Admin',
+    FullName: 'Dr. Arpasree Admin',
+    Position: 'System Administrator',
+    Affiliation: 'Faculty of Nursing, Thammasat University',
+    Phone: '025644444',
+    LineID: 'arpasree_admin',
+    Status: 'Active',
+    CreatedAt: new Date().toISOString(),
+    UpdatedAt: new Date().toISOString()
+  },
+  {
     UserID: 'U_ADMIN',
     Email: 'admin@example.com',
     Password: '1234',
@@ -1245,16 +1262,31 @@ export class LocalDatabaseStore {
       this.set('activityLogs', getInitialActivityLogs());
       localStorage.setItem('doctoral_portfolio_initialized', 'true');
     } else {
-      // Self-healing: ensure SuperAdvisor seeded user is injected into existing localStorage
+      // Self-healing: ensure SuperAdvisor and Arpasree Admin seeded users are injected into existing localStorage
       const existingUsers = this.get<any[]>('users', []);
+      let updated = false;
+
       const hasSuperAdvisor = existingUsers.some(u => u.Role === 'SuperAdvisor');
+      const initialUsers = getInitialUsers();
       if (!hasSuperAdvisor && existingUsers.length > 0) {
-        const initialUsers = getInitialUsers();
         const superAdvisorUser = initialUsers.find(u => u.Role === 'SuperAdvisor');
         if (superAdvisorUser) {
           existingUsers.push(superAdvisorUser);
-          this.set('users', existingUsers);
+          updated = true;
         }
+      }
+
+      const hasArpasree = existingUsers.some(u => u.Email?.toLowerCase() === 'arpasree104@gmail.com');
+      if (!hasArpasree && existingUsers.length > 0) {
+        const arpasreeUser = initialUsers.find(u => u.Email?.toLowerCase() === 'arpasree104@gmail.com');
+        if (arpasreeUser) {
+          existingUsers.push(arpasreeUser);
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        this.set('users', existingUsers);
       }
     }
   }
