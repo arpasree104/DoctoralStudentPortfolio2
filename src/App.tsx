@@ -21,12 +21,20 @@ import {
   ArrowRight,
   Database,
   UserPlus,
-  ArrowLeft
+  ArrowLeft,
+  CloudLightning
 } from 'lucide-react';
 
 import { LocalDatabaseStore } from './data';
 import { exportStudentToExcel } from './lib/excelExporter';
 import { isFirebaseEnabled } from './lib/firebase';
+import {
+  initGoogleAuth,
+  signInWithGoogle,
+  logoutGoogle,
+  getGoogleAccessToken,
+  getGoogleUser
+} from './lib/googleDrive';
 import {
   User as UserType,
   UserRole,
@@ -62,6 +70,10 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [currentUser, setCurrentUser] = React.useState<UserType | null>(null);
   const [activePage, setActivePage] = React.useState<string>('dashboard');
+
+  // Google Drive Connection State
+  const [googleDriveUser, setGoogleDriveUser] = React.useState<any>(null);
+  const [googleDriveToken, setGoogleDriveToken] = React.useState<string | null>(null);
 
   // Directory variables mapped into local React state
   const [users, setUsers] = React.useState<UserType[]>([]);
@@ -153,8 +165,20 @@ export default function App() {
       refreshFromStore();
     });
 
+    const unsubGoogle = initGoogleAuth(
+      (user, token) => {
+        setGoogleDriveUser(user);
+        setGoogleDriveToken(token);
+      },
+      () => {
+        setGoogleDriveUser(null);
+        setGoogleDriveToken(null);
+      }
+    );
+
     return () => {
       unsubscribe();
+      unsubGoogle();
     };
   }, []);
 
@@ -931,6 +955,48 @@ export default function App() {
                 <button onClick={() => handleQuickLogin('superadvisor@example.com')} className="hover:underline text-purple-700">Super</button>
                 <span className="text-gray-300">|</span>
                 <button onClick={() => handleQuickLogin('admin@example.com')} className="hover:underline text-[#B91C1C]">Admin</button>
+              </div>
+            )}
+
+            {/* Google Drive Connection Button */}
+            {isLoggedIn && (
+              <div className="flex items-center gap-1">
+                {googleDriveToken ? (
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-xs font-semibold">
+                    <CloudLightning className="w-3.5 h-3.5 animate-pulse" />
+                    <span className="hidden md:inline">Drive Connected</span>
+                    <button 
+                      onClick={async () => {
+                        await logoutGoogle();
+                        setGoogleDriveUser(null);
+                        setGoogleDriveToken(null);
+                      }}
+                      className="ml-1 text-[10px] underline hover:text-emerald-950 cursor-pointer font-bold"
+                      title="Disconnect Google Drive"
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await signInWithGoogle();
+                        if (res) {
+                          setGoogleDriveUser(res.user);
+                          setGoogleDriveToken(res.accessToken);
+                        }
+                      } catch (e) {
+                        console.error(e);
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 hover:bg-amber-100 text-[#B91C1C] border border-[#B91C1C]/20 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    title="Connect Google Drive to save Firebase space"
+                  >
+                    <CloudLightning className="w-3.5 h-3.5" />
+                    <span>Connect Drive</span>
+                  </button>
+                )}
               </div>
             )}
 

@@ -6,10 +6,16 @@
 import React from 'react';
 import { 
   Edit3, User, Mail, Phone, Calendar, BookOpen, Link2, 
-  Award, Camera, Plus, Trash2, PlusCircle, X, Check, Eye 
+  Award, Camera, Plus, Trash2, PlusCircle, X, Check, Eye,
+  CloudLightning
 } from 'lucide-react';
 import { User as UserType, StudentCertificate, StudentActivity } from '../types';
 import Modal from './Modal';
+import { 
+  getGoogleAccessToken, 
+  signInWithGoogle, 
+  uploadFileToBirdFolder 
+} from '../lib/googleDrive';
 
 interface StudentInformationProps {
   student: UserType;
@@ -48,6 +54,12 @@ export default function StudentInformation({
   const [orcid, setOrcid] = React.useState(student.ORCID || '');
   const [interests, setInterests] = React.useState(student.ResearchInterests || '');
   const [expectedGrad, setExpectedGrad] = React.useState(student.ExpectedGraduationYear || 2029);
+  const [photoURL, setPhotoURL] = React.useState(student.PhotoURL || '');
+
+  // Google Drive and image upload status
+  const [googleToken, setGoogleToken] = React.useState<string | null>(getGoogleAccessToken());
+  const [uploadProgress, setUploadProgress] = React.useState<string | null>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
 
   // Certificates state
   const [isCertModalOpen, setIsCertModalOpen] = React.useState(false);
@@ -74,6 +86,7 @@ export default function StudentInformation({
     setOrcid(student.ORCID || '');
     setInterests(student.ResearchInterests || '');
     setExpectedGrad(student.ExpectedGraduationYear || 2029);
+    setPhotoURL(student.PhotoURL || '');
   }, [student]);
 
   const handleSaveDemographics = (e: React.FormEvent) => {
@@ -83,9 +96,92 @@ export default function StudentInformation({
       LineID: lineID.trim(),
       ORCID: orcid.trim(),
       ResearchInterests: interests.trim(),
-      ExpectedGraduationYear: Number(expectedGrad)
+      ExpectedGraduationYear: Number(expectedGrad),
+      PhotoURL: photoURL.trim() || undefined
     });
     setIsEditOpen(false);
+  };
+
+  // Google Drive Upload Handlers
+  const handleUploadToGoogleDrive = async (file: File): Promise<string | null> => {
+    let token = googleToken || getGoogleAccessToken();
+    if (!token) {
+      try {
+        setUploadProgress('Connecting to Google Drive...');
+        const loginRes = await signInWithGoogle();
+        if (loginRes) {
+          token = loginRes.accessToken;
+          setGoogleToken(token);
+        } else {
+          setUploadProgress(null);
+          alert('Google Drive connection was not completed.');
+          return null;
+        }
+      } catch (err) {
+        console.error(err);
+        setUploadProgress(null);
+        alert('Failed to connect to Google Drive. Please make sure Google Drive is enabled.');
+        return null;
+      }
+    }
+
+    try {
+      setIsUploading(true);
+      setUploadProgress('Uploading image to your Google Drive "Bird" folder...');
+      const result = await uploadFileToBirdFolder(token!, file, `Bird_${Date.now()}_${file.name}`);
+      setUploadProgress('Successfully uploaded!');
+      setTimeout(() => setUploadProgress(null), 3000);
+      return result.url;
+    } catch (err: any) {
+      console.error(err);
+      setUploadProgress(`Upload failed: ${err.message || 'Unknown error'}`);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleMultipleUploadsToGoogleDrive = async (files: FileList) => {
+    let token = googleToken || getGoogleAccessToken();
+    if (!token) {
+      try {
+        setUploadProgress('Connecting to Google Drive...');
+        const loginRes = await signInWithGoogle();
+        if (loginRes) {
+          token = loginRes.accessToken;
+          setGoogleToken(token);
+        } else {
+          setUploadProgress(null);
+          alert('Google Drive connection was not completed.');
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+        setUploadProgress(null);
+        alert('Failed to connect to Google Drive.');
+        return;
+      }
+    }
+
+    setIsUploading(true);
+    const urls: string[] = [];
+    const fileArray = Array.from(files);
+    
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      setUploadProgress(`Uploading photo ${i + 1} of ${fileArray.length} to Google Drive...`);
+      try {
+        const result = await uploadFileToBirdFolder(token!, file, `Bird_Activity_${Date.now()}_${file.name}`);
+        urls.push(result.url);
+      } catch (err) {
+        console.error(`Failed to upload ${file.name}`, err);
+      }
+    }
+
+    setActImages([...actImages, ...urls]);
+    setUploadProgress('All photos uploaded successfully!');
+    setTimeout(() => setUploadProgress(null), 3000);
+    setIsUploading(false);
   };
 
   // Base64 file converter
@@ -648,12 +744,20 @@ export default function StudentInformation({
 
           {/* Certificate Image File Selection */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-600 block">Certificate Document Image File</label>
+            <label className="text-xs font-bold text-gray-600 block">Certificate Document Image File (Uploads directly to your Google Drive 'Bird' folder)</label>
             <div className="flex items-center gap-3">
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleFileChange(e, setCertImage)}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const uploadedUrl = await handleUploadToGoogleDrive(file);
+                    if (uploadedUrl) {
+                      setCertImage(uploadedUrl);
+                    }
+                  }
+                }}
                 className="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-[#B91C1C] hover:file:bg-amber-100 cursor-pointer"
               />
               <span className="text-[10px] text-gray-400 font-bold">OR</span>
@@ -665,6 +769,13 @@ export default function StudentInformation({
                 className="flex-1 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs focus:ring-1 focus:ring-[#B91C1C] focus:outline-hidden font-medium"
               />
             </div>
+
+            {uploadProgress && (
+              <div className="text-xs font-bold text-[#B91C1C] bg-amber-50 border border-[#B91C1C]/15 p-2 rounded-lg flex items-center gap-1.5 mt-1.5">
+                <CloudLightning className="w-3.5 h-3.5 animate-pulse" />
+                <span>{uploadProgress}</span>
+              </div>
+            )}
             
             {certImage && (
               <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-lg relative inline-block">
@@ -775,15 +886,27 @@ export default function StudentInformation({
 
           {/* Activity Pictures Grid Uploads */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-600 block">Upload Collage Pictures (Supports Multi-Selection)</label>
+            <label className="text-xs font-bold text-gray-600 block">Upload Collage Pictures (Directly to your Google Drive 'Bird' folder)</label>
             <input
               type="file"
               multiple
               accept="image/*"
-              onChange={(e) => handleMultipleFilesChange(e, setActImages)}
+              onChange={async (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  await handleMultipleUploadsToGoogleDrive(files);
+                }
+              }}
               className="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-[#B91C1C] hover:file:bg-amber-100 cursor-pointer w-full"
             />
             <p className="text-[10px] text-gray-400 mt-1">Select one or more photos representing Zoom classes, presentations, or documents.</p>
+
+            {uploadProgress && (
+              <div className="text-xs font-bold text-[#B91C1C] bg-amber-50 border border-[#B91C1C]/15 p-2 rounded-lg flex items-center gap-1.5 mt-1.5">
+                <CloudLightning className="w-3.5 h-3.5 animate-pulse" />
+                <span>{uploadProgress}</span>
+              </div>
+            )}
 
             {actImages.length > 0 && (
               <div className="grid grid-cols-4 gap-2 mt-2 p-2 bg-gray-50 border border-gray-200 rounded-xl">
@@ -881,6 +1004,32 @@ export default function StudentInformation({
               placeholder="e.g. Gerontological Care, Tele-nursing, self-care interventions"
               className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-1 focus:ring-[#B91C1C] focus:outline-hidden"
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-gray-600 block">Profile Photo (Directly to your Google Drive 'Bird' folder)</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const uploadedUrl = await handleUploadToGoogleDrive(file);
+                    if (uploadedUrl) {
+                      setPhotoURL(uploadedUrl);
+                    }
+                  }
+                }}
+                className="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-[#B91C1C] hover:file:bg-amber-100 cursor-pointer"
+              />
+            </div>
+            {photoURL && (
+              <div className="flex items-center gap-2 mt-1.5 p-1.5 bg-gray-50 border border-gray-100 rounded-lg">
+                <img src={photoURL} className="w-10 h-10 rounded-md object-cover border" referrerPolicy="no-referrer" />
+                <span className="text-[10px] text-gray-400 truncate max-w-xs">{photoURL}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
