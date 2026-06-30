@@ -757,7 +757,40 @@ export default function App() {
             </div>
             <div>
               <span className="text-[8px] font-extrabold text-[#B91C1C] tracking-wider block uppercase">Thammasat University</span>
-              <h1 className="text-sm font-bold text-[#1A1A1A] tracking-tight">Nursing PhD Portfolio</h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-sm font-bold text-[#1A1A1A] tracking-tight">Nursing PhD Portfolio</h1>
+                
+                {/* Compact Database Connection Indicator */}
+                <div className="relative group flex items-center justify-center">
+                  <div 
+                    className={`w-5 h-5 rounded-full flex items-center justify-center transition-all cursor-help ${
+                      isFirebaseEnabled 
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100' 
+                        : 'bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100'
+                    }`}
+                  >
+                    <Database className="w-3 h-3" />
+                    {isFirebaseEnabled && (
+                      <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                    )}
+                  </div>
+                  
+                  {/* Absolute CSS Tooltip with hover trigger */}
+                  <div className="absolute left-0 top-full mt-2 hidden group-hover:block w-64 bg-slate-900 text-white text-[10px] p-2.5 rounded-lg shadow-lg z-50 font-normal leading-relaxed">
+                    <p className="font-bold flex items-center gap-1.5 mb-1 text-white">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isFirebaseEnabled ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+                      {isFirebaseEnabled ? 'Google Cloud Firebase (Online)' : 'Local Offline Storage'}
+                    </p>
+                    <p className="text-gray-300">
+                      {isFirebaseEnabled 
+                        ? 'Real-time bidirectional synchronization is active. All doctoral data is securely persisted in the cloud database.'
+                        : 'Using browser local-first database. To link a permanent cloud database, configure VITE_FIREBASE_API_KEY in your cloud environment settings.'}
+                    </p>
+                    {/* Tooltip arrow pointer */}
+                    <div className="absolute top-0 left-2.5 -translate-y-1 border-4 border-transparent border-b-slate-900"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -882,33 +915,7 @@ export default function App() {
       {/* Main content viewport space */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 pb-20">
         
-        {/* Firebase Sync Status Banner */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-gray-200/60 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className={`p-1.5 rounded-lg ${isFirebaseEnabled ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-              <Database className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="font-bold text-xs">
-                {isFirebaseEnabled ? (
-                  <span className="text-emerald-700">Database Engine: Google Cloud Firebase (Firestore)</span>
-                ) : (
-                  <span className="text-amber-700">Database Engine: Local Offline Storage</span>
-                )}
-              </p>
-              <p className="text-[11px] text-gray-500 mt-0.5 font-medium">
-                {isFirebaseEnabled 
-                  ? "Real-time bidirectional synchronization is active. Your doctoral portfolio is securely persistent in the cloud."
-                  : "All changes are saved to your browser session. To persist your data permanently in the cloud, add your VITE_FIREBASE_API_KEY in Settings."}
-              </p>
-            </div>
-          </div>
-          {isFirebaseEnabled && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
-              ● Active Cloud Sync
-            </span>
-          )}
-        </div>
+        {/* Firebase Sync Status Banner removed per user request for space optimization (moved to top header icon status) */}
 
         {/* Dynamic page route component mount */}
         {activePage === 'dashboard' && currentUser?.Role === 'Student' && (
